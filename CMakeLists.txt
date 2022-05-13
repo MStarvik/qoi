@@ -20,9 +20,10 @@ target_link_libraries(qoi_test
     PRIVATE
         qoi
         ${OpenCV_LIBS})
-set_property(TARGET qoi_test PROPERTY CMAKE_CXX_STANDARD 17)
-set_property(TARGET qoi_test PROPERTY CMAKE_CXX_STANDARD_REQUIRED ON)
-
+set_target_properties(qoi_test
+    PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON)
 
 add_library(qoi_fast src/qoi_fast.c)
 target_include_directories(qoi_fast
@@ -37,5 +38,7 @@ target_link_libraries(qoi_fast_test
     PRIVATE
         qoi_fast
         ${OpenCV_LIBS})
-set_property(TARGET qoi_fast_test PROPERTY CMAKE_CXX_STANDARD 17)
-set_property(TARGET qoi_fast_test PROPERTY CMAKE_CXX_STANDARD_REQUIRED ON)
+set_target_properties(qoi_fast_test
+    PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON)
