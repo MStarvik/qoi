@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
   }
 
   qoi_header header;
-  if (!qoi_decode_header(input, &header)) {
+  if (!qoi_decode_header(&header, input)) {
     return 1;
   }
 

@@ -1,6 +1,5 @@
 #include "qoi.h"
 
-#include <stdint.h>
 #include <string.h>
 
 typedef struct {
@@ -102,9 +101,9 @@ bool qoi_encode(qoi_header header, uint8_t *dest, uint8_t *src) {
 
   int run = 0;
   for (; src < src_end; src++) {
-    if () {
+    // if () {
       
-    }
+    // }
   }
 
 
@@ -125,75 +124,75 @@ bool qoi_decode_header(qoi_header *dest, uint8_t *src) {
   return true;
 }
 
-bool qoi_decode(uint8_t *input, uint8_t *output, size_t size) {
+bool qoi_decode(uint8_t *dest, uint8_t *src, size_t size) {
   qoi_header header;
-  qoi_decode_header(input, &header);
-  input += sizeof(header);
+  qoi_decode_header(&header, src);
+  src += sizeof(header);
   
   // const bool alpha = header.channels == 4;
 
   qoi_px_rgba px = {0, 0, 0, 255};
   qoi_px_rgba pxs[64] = {};
 
-  const uint8_t *input_begin = input;
-  const uint8_t *input_end = input_begin + size - 8;
+  const uint8_t *src_begin = src;
+  const uint8_t *src_end = src_begin + size - 8;
 
-  // const uint8_t *output_begin = input;
-  // const uint8_t *output_end = output_begin + header.width * header.height * header.channels;
+  // const uint8_t *dest_begin = dest;
+  // const uint8_t *dest_end = dest_begin + header.width * header.height * header.channels;
   
-  while (input < input_end) {
-    const int tag = *input;
+  while (src < src_end) {
+    const int tag = *src;
     if (tag == 0b11111110) {
-      *(qoi_px_rgb*)(&px) = *(qoi_px_rgb*)(++input);
-      input += sizeof(qoi_px_rgb);
+      *(qoi_px_rgb*)(&px) = *(qoi_px_rgb*)(++src);
+      src += sizeof(qoi_px_rgb);
       pxs[qoi_hash(&px)] = px;
     } else if (tag == 0b11111111) {
-      px = *(qoi_px_rgba*)(++input);
-      input += sizeof(qoi_px_rgba);
+      px = *(qoi_px_rgba*)(++src);
+      src += sizeof(qoi_px_rgba);
       pxs[qoi_hash(&px)] = px;
     }
     else {
-      const int tag = *input >> 6;
+      const int tag = *src >> 6;
       if (tag == 0b00) {
-        px = pxs[((qoi_op_index*)input)->index];
-        input += sizeof(qoi_op_index);
+        px = pxs[((qoi_op_index*)src)->index];
+        src += sizeof(qoi_op_index);
       }
       else if (tag == 0b01) {
-        px.r += ((qoi_op_diff*)input)->dr - 2;
-        px.g += ((qoi_op_diff*)input)->dg - 2;
-        px.b += ((qoi_op_diff*)input)->db - 2;
-        input += sizeof(qoi_op_diff);
+        px.r += ((qoi_op_diff*)src)->dr - 2;
+        px.g += ((qoi_op_diff*)src)->dg - 2;
+        px.b += ((qoi_op_diff*)src)->db - 2;
+        src += sizeof(qoi_op_diff);
         pxs[qoi_hash(&px)] = px;
       }
       else if (tag == 0b10) {
-        const int dg = ((qoi_op_luma*)input)->dg - 32;
-        px.r += dg + ((qoi_op_luma*)input)->dr_dg - 8;
+        const int dg = ((qoi_op_luma*)src)->dg - 32;
+        px.r += dg + ((qoi_op_luma*)src)->dr_dg - 8;
         px.g += dg;
-        px.b += dg + ((qoi_op_luma*)input)->db_dg - 8;
-        input += sizeof(qoi_op_luma);
+        px.b += dg + ((qoi_op_luma*)src)->db_dg - 8;
+        src += sizeof(qoi_op_luma);
         pxs[qoi_hash(&px)] = px;
       }
       else if (tag == 0b11) {
-        for (int i = 0; i < ((qoi_op_run*)input)->run; i++) {
+        for (int i = 0; i < ((qoi_op_run*)src)->run; i++) {
           if (header.channels == 4) {
-            *(qoi_px_rgba*)output = px;
-            output += sizeof(qoi_px_rgba);
+            *(qoi_px_rgba*)dest = px;
+            dest += sizeof(qoi_px_rgba);
           }
           else {
-            *(qoi_px_rgb*)output = *(qoi_px_rgb*)(&px);
-            output += sizeof(qoi_px_rgb);
+            *(qoi_px_rgb*)dest = *(qoi_px_rgb*)(&px);
+            dest += sizeof(qoi_px_rgb);
           }
         }
-        input += sizeof(qoi_op_run);
+        src += sizeof(qoi_op_run);
       }
     }
     if (header.channels == 4) {
-      *(qoi_px_rgba*)output = px;
-      output += sizeof(qoi_px_rgba);
+      *(qoi_px_rgba*)dest = px;
+      dest += sizeof(qoi_px_rgba);
     }
     else {
-      *(qoi_px_rgb*)output = *(qoi_px_rgb*)(&px);
-      output += sizeof(qoi_px_rgb);
+      *(qoi_px_rgb*)dest = *(qoi_px_rgb*)(&px);
+      dest += sizeof(qoi_px_rgb);
     }
   }
   return true;

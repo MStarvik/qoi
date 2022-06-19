@@ -16,11 +16,11 @@ typedef struct {
 extern "C" {
 #endif 
 
-bool qoi_encode_header(uint32_t width, uint32_t height, uint8_t channels, qoi_header* header);
-bool qoi_encode(uint8_t* input, uint8_t* output, qoi_header header);
+bool qoi_encode_header(qoi_header* dest, uint32_t width, uint32_t height, uint8_t channels, uint8_t colorspace);
+bool qoi_encode(qoi_header header, uint8_t* dest, uint8_t* src);
 
-bool qoi_decode_header(uint8_t* input, qoi_header* header);
-bool qoi_decode(uint8_t* input, uint8_t* output, size_t size);
+bool qoi_decode_header(qoi_header* dest, uint8_t* src);
+bool qoi_decode(uint8_t* dest, uint8_t* src, size_t size);
 
 #ifdef __cplusplus
 }
