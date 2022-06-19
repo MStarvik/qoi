@@ -1,5 +1,6 @@
-#include "qoi_fast.h"
+#include "qoi.h"
 
+#include <stdint.h>
 #include <string.h>
 
 typedef struct {
@@ -14,16 +15,6 @@ typedef struct {
   uint8_t b;
   uint8_t a;
 } qoi_px_rgba;
-
-// typedef struct {
-//   uint8_t    tag;
-//   qoi_px_rgb rgb;
-// } qoi_op_rgb;
-
-// typedef struct {
-//   uint8_t     tag;
-//   qoi_px_rgba rgba;
-// } qoi_op_rgba;
 
 typedef struct {
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
@@ -81,12 +72,55 @@ static inline int qoi_hash(const qoi_px_rgba* px) {
   return (px->r * 3 + px->g * 5 + px->b * 7 + px->a * 11) % 64;
 }
 
-bool qoi_decode_header(uint8_t *input, qoi_header *header) {
-  memcpy(header, input, sizeof(*header));
+bool qoi_encode_header(qoi_header *dest, uint32_t width, uint32_t height, uint8_t channels, uint8_t colorspace) {
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+  dest->magic = *(uint32_t*)"qoif";
+  dest->width = width;
+  dest->height = height;
+  dest->channels = channels;
+  dest->colorspace = colorspace;
+#endif
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-  header->magic = __builtin_bswap32(header->magic);
-  header->width = __builtin_bswap32(header->width);
-  header->height = __builtin_bswap32(header->height);
+  dest->magic = *(uint32_t*)"fioq";
+  dest->width = __builtin_bswap32(width);
+  dest->height = __builtin_bswap32(height);
+  dest->channels = channels;
+  dest->colorspace = colorspace;
+#endif
+  return true;
+}
+
+bool qoi_encode(qoi_header header, uint8_t *dest, uint8_t *src) {
+  *(qoi_header*)dest = header;
+  dest += sizeof(header);
+
+  qoi_px_rgba px = {0, 0, 0, 255};
+  qoi_px_rgba pxs[64] = {};
+
+  const uint8_t *src_begin = src;
+  const uint8_t *src_end = src_begin + header.width * header.height * header.channels;
+
+  int run = 0;
+  for (; src < src_end; src++) {
+    if () {
+      
+    }
+  }
+
+
+
+}
+
+bool qoi_decode_header(qoi_header *dest, uint8_t *src) {
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+  *dest = *(qoi_header*)input;
+#endif
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+  dest->magic = __builtin_bswap32(((qoi_header*)src)->magic);
+  dest->width = __builtin_bswap32(((qoi_header*)src)->width);
+  dest->height = __builtin_bswap32(((qoi_header*)src)->height);
+  dest->channels = ((qoi_header*)src)->channels;
+  dest->colorspace = ((qoi_header*)src)->colorspace;
 #endif
   return true;
 }

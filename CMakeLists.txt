@@ -7,7 +7,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 find_package(OpenCV REQUIRED)
 
-add_library(qoi src/qoi.cpp)
+add_library(qoi src/qoi.c)
 target_include_directories(qoi
     PUBLIC
         include)
@@ -21,24 +21,6 @@ target_link_libraries(qoi_test
         qoi
         ${OpenCV_LIBS})
 set_target_properties(qoi_test
-    PROPERTIES
-        CXX_STANDARD 17
-        CXX_STANDARD_REQUIRED ON)
-
-add_library(qoi_fast src/qoi_fast.c)
-target_include_directories(qoi_fast
-    PUBLIC
-        include)
-        
-add_executable(qoi_fast_test src/qoi_fast_test.cpp)
-target_include_directories(qoi_fast_test
-    PRIVATE
-        ${OpenCV_INCLUDE_DIRS})
-target_link_libraries(qoi_fast_test
-    PRIVATE
-        qoi_fast
-        ${OpenCV_LIBS})
-set_target_properties(qoi_fast_test
     PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED ON)
